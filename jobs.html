@@ -200,7 +200,7 @@
 </div>
 
 <script>
-  const JOBS_API = "http://localhost:3000/jobs"; 
+  const JOBS_API = "https://interview-fera.onrender.com/jobs"; 
   const APPLY_API = "http://localhost:3000/apply"; 
 
   const jobsContainer = document.getElementById("jobs");
@@ -249,21 +249,7 @@
     alert("Applying for Job ID: " + jobId);
     window.location.href = `interview.html?job_id=${jobId}`;
     localStorage.setItem("jobid", jobId);
-/* fetch(APPLY_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ job_id: jobId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      //alert("Application started for Job ID: " + jobId);
-    })
-    .catch(err => {
-      alert("Failed to start application");
-      console.error(err);
-    });*/
+
   }
 </script>
 
