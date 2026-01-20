@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Available Jobs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Upwork Brand Colors */
+      --up-green: #108a00;
+      --up-green-hover: #14a800;
+      --up-dark: #001e00;
+      --up-grey-bg: #F2F7F2; /* Very light green-grey tint */
+      --up-card-border: #d5e0d5;
+      --up-text-body: #5e6d55;
+      --up-text-light: #9aaa97;
+    }
+
+    body {
+      font-family: 'Roboto', Helvetica, Arial, sans-serif;
+      background: #ffffff; /* Upwork is mostly clean white */
+      color: var(--up-dark);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Mimic the Upwork container width */
+    .container-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: var(--up-dark);
+      font-size: 2rem;
+      font-weight: 500; /* Upwork uses slightly lighter headings */
+      letter-spacing: -0.5px;
+    }
+
+    .jobs-container {
+      display: grid;
+      grid-template-columns: 1fr; /* Upwork feed is usually a list, but grid works too */
+      gap: 0; /* Removing gap for list view style, or keeping for cards */
+      border: 1px solid var(--up-card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* Switch to grid cards if screen is wide, or keep list. 
+       Let's stick to the user's grid logic but style it cleanly */
+    @media (min-width: 768px) {
+      .jobs-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        border: none;
+        gap: 20px;
+        overflow: visible;
+      }
+    }
+
+    .job-card {
+      background: #ffffff;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    /* Desktop: Card style | Mobile: List style logic handled via media query above */
+    @media (min-width: 768px) {
+      .job-card {
+        border: 1px solid #e4ebe4;
+        border-radius: 16px;
+        box-shadow: none;
+      }
+      .job-card:hover {
+        border-color: var(--up-green); /* Subtle green border on hover */
+      }
+    }
+
+    /* Mobile: List style borders */
+    @media (max-width: 767px) {
+      .job-card {
+        border-bottom: 1px solid #e4ebe4;
+      }
+      .job-card:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .job-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--up-dark);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    /* Upwork Title Hover Effect */
+    .job-card:hover .job-title {
+      color: var(--up-green);
+      text-decoration: underline;
+    }
+
+    .department {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #5e6d55;
+      background: #f2f2f2; /* Grey Pill */
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: var(--up-dark);
+      margin-bottom: 20px;
+      /* Clamp text */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #656565;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .meta strong {
+      color: var(--up-dark);
+      font-weight: 500;
+    }
+
+    /* Upwork Button Style */
+    button {
+      padding: 10px 20px;
+      border: 2px solid var(--up-green);
+      background: #ffffff; /* Outline style initially or solid? Upwork uses both. Let's do Solid Green */
+      background-color: var(--up-green);
+      color: #ffffff;
+      border-radius: 24px; /* Pill shape */
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: var(--up-green-hover);
+      border-color: var(--up-green-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Loading States */
+    .loading {
+      text-align: center;
+      color: var(--up-green);
+      font-weight: 500;
+      margin-top: 40px;
+    }
+
+    .error {
+      text-align: center;
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-wrapper">
+  <h1>Jobs matching your skills</h1>
+
+  <div id="status" class="loading">Loading jobs…</div>
+  <div class="jobs-container" id="jobs"></div>
+</div>
+
+<script>
+  const JOBS_API = "http://localhost:3000/jobs"; 
+  const APPLY_API = "http://localhost:3000/apply"; 
+
+  const jobsContainer = document.getElementById("jobs");
+  const statusEl = document.getElementById("status");
+
+  fetch(JOBS_API)
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      return res.json();
+    })
+    .then(data => {
+      console.log("Raw job data:", data);
+      console.log("Number of jobs received:", data.jobs.length);
+      statusEl.style.display = "none";
+
+      if (!data.jobs.length) {
+        statusEl.style.display = "block";
+        statusEl.textContent = "No jobs available at the moment.";
+        return;
+      }
+      data.jobs.forEach(job => {
+        console.log("Rendering job:", job);
+        const card = document.createElement("div");
+        card.className = "job-card";
+
+        card.innerHTML = `
+          <div>
+            <div class="job-title">${job.Job_Title}</div>
+            <div class="department">${job.Department}</div>
+            <div class="description">${job.Job_Description}</div>
+            <div class="meta"><strong>Experience:</strong> ${job.Experience_Level}</div>
+          </div>
+          <button onclick="applyJob('${job.Job_ID}')">Apply Now</button>
+        `;
+
+        jobsContainer.appendChild(card);
+      });
+    })
+    .catch(err => {
+      statusEl.className = "error";
+      statusEl.textContent = "Error loading jobs. Check proxy server.";
+      console.error(err);
+    });
+
+  function applyJob(jobId) {
+    alert("Applying for Job ID: " + jobId);
+    window.location.href = `interview.html?job_id=${jobId}`;
+    localStorage.setItem("jobid", jobId);
+/* fetch(APPLY_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ job_id: jobId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      //alert("Application started for Job ID: " + jobId);
+    })
+    .catch(err => {
+      alert("Failed to start application");
+      console.error(err);
+    });*/
+  }
+</script>
+
+</body>
+</html>

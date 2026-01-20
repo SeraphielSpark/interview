@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Interview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Upwork Palette */
+      --up-green: #108a00;
+      --up-green-hover: #14a800;
+      --up-dark: #001e00;
+      --up-bg: #f2f7f2;
+      --up-text: #001e00;
+      --up-grey-text: #5e6d55;
+      --border-color: #d5e0d5;
+      --white: #ffffff;
+    }
+
+    body {
+      margin: 0;
+      background: var(--up-bg);
+      font-family: 'Roboto', Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center vertically on large screens */
+      min-height: 100vh;
+      color: var(--up-text);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      height: 100vh; /* Full height on mobile */
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* Desktop constraint: Make it look like a chat window */
+    @media (min-width: 768px) {
+      .app {
+        height: 90vh;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+    }
+
+    /* --- Header --- */
+    .header {
+      background: var(--white);
+      color: var(--up-dark);
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--up-grey-text);
+      font-weight: 500;
+    }
+
+    /* --- Chat Area --- */
+    .chat {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 12px 16px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* AI Bubble (Left) */
+    .ai {
+      background: #f2f7f2; /* Very light green tint */
+      color: var(--up-dark);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px; /* Speech bubble effect */
+    }
+
+    /* User Bubble (Right) */
+    .user {
+      background: var(--up-green);
+      color: var(--white);
+      align-self: flex-end;
+      border-bottom-right-radius: 2px; /* Speech bubble effect */
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* --- Input Area --- */
+    .input-area {
+      display: flex;
+      gap: 12px;
+      padding: 20px;
+      background: var(--white);
+      border-top: 1px solid var(--border-color);
+      align-items: flex-end; /* Align bottom if text wraps */
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      padding: 12px 14px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      outline: none;
+      transition: border-color 0.2s;
+      background: #f9f9f9;
+    }
+
+    textarea:focus {
+      border-color: var(--up-green);
+      background: #fff;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: var(--up-green);
+      color: var(--white);
+      border: none;
+      border-radius: 24px; /* Pill shape button */
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      height: 48px; /* Match textarea height roughly */
+    }
+
+    button:hover {
+      background: var(--up-green-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    /* --- Status Bar --- */
+    .status {
+      font-size: 12px;
+      padding: 8px 24px;
+      background: var(--up-dark); /* Dark footer like Upwork footer */
+      color: #fff;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* Scrollbar styling for Webkit */
+    .chat::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat::-webkit-scrollbar-thumb {
+      background-color: #d1d5db;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h2 id="jobTitle">AI Interview</h2>
+    <p id="jobDept">Answer honestly and clearly</p>
+  </div>
+
+  <div id="chat" class="chat"></div>
+
+  <div class="input-area">
+    <textarea id="input" rows="1" placeholder="Type your answer here..."></textarea>
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <div id="status" class="status">Connecting to interview system…</div>
+</div>
+
+<script>
+  const INTERVIEW_ENDPOINT = "http://localhost:3000/interview";
+  const jobId = new URLSearchParams(window.location.search).get("job_id");
+
+  function generateSessionId() {
+    return 'sess_' + Math.random().toString(36).substring(2, 10) + Date.now();
+  }
+
+  let sessionId = localStorage.getItem("interview_session_id");
+  if (!sessionId) {
+    sessionId = generateSessionId();
+    localStorage.setItem("interview_session_id", sessionId);
+  }
+
+  let chatHistory = [];
+
+  const chatEl = document.getElementById("chat");
+  const statusEl = document.getElementById("status");
+  const sendBtn = document.getElementById("sendBtn");
+  const inputEl = document.getElementById("input");
+
+  function renderMessage(text, role) {
+    const div = document.createElement("div");
+    div.className = `message ${role}`;
+    div.textContent = text;
+    chatEl.appendChild(div);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function safeString(val) {
+    return (typeof val === "string" && val.trim() !== "") ? val : null;
+  }
+
+  async function postToInterview(answer = null) {
+    statusEl.textContent = "AI is thinking…";
+
+    const payload = {
+      job_id: jobId,
+      session_id: sessionId,
+      message: answer,
+      history: chatHistory
+    };
+
+    try {
+      const res = await fetch(INTERVIEW_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (safeString(data.job_title)) {
+        document.getElementById("jobTitle").textContent = data.job_title;
+      }
+
+      if (safeString(data.department)) {
+        document.getElementById("jobDept").textContent = data.department;
+      }
+
+      if (safeString(data.reply)) {
+        chatHistory.push({ role: "assistant", content: data.reply });
+        renderMessage(data.reply, "ai");
+      }
+
+      if (data.completed === true) {
+        const score = (typeof data.final_score === "number") ? data.final_score : "N/A";
+        const verdict = safeString(data.verdict) || "Pending";
+        const summary = safeString(data.summary) || "No summary available.";
+
+        renderMessage(
+          `Interview completed.\nFinal Score: ${score}\nDecision: ${verdict}\nSummary: ${summary}`,
+          "ai"
+        );
+
+        statusEl.textContent = "Interview finished";
+        inputEl.disabled = true;
+        sendBtn.disabled = true;
+        return;
+      }
+
+      statusEl.textContent = "Interview in progress";
+
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "Connection error";
+    }
+  }
+
+  sendBtn.addEventListener("click", () => {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    chatHistory.push({ role: "user", content: text });
+    renderMessage(text, "user");
+    inputEl.value = "";
+    postToInterview(text);
+  });
+
+  if (!jobId) {
+    statusEl.textContent = "Missing job_id";
+    sendBtn.disabled = true;
+  } else {
+    // initial message from AI
+    const startMessage = `Welcome to the interview.\n\nThis interview will assess your suitability for the role.\n\nWhen you are ready, respond with "Ready" to begin.`;
+    chatHistory.push({ role: "assistant", content: startMessage });
+    renderMessage(startMessage, "ai");
+
+    
+  }
+</script>
+
+</body>
+</html>
