@@ -22,25 +22,29 @@
       --white: #ffffff;
     }
 
+    * {
+      box-sizing: border-box; /* Global box-sizing for consistent sizing */
+    }
+
     body {
       margin: 0;
       background: var(--up-bg);
       font-family: 'Roboto', Helvetica, Arial, sans-serif;
       display: flex;
-      flex-direction: column; /* Stack header and app vertically */
-      min-height: 100vh;
+      flex-direction: column; 
+      height: 100vh; /* Force body to full viewport height */
+      overflow: hidden; /* Prevent body scroll, handle scroll in app */
       color: var(--up-text);
     }
 
-    /* --- NEW HEADER STYLES --- */
+    /* --- HEADER STYLES --- */
     .dev-header {
       background-color: var(--up-dark);
       color: var(--white);
       padding: 12px 20px;
       font-size: 14px;
       width: 100%;
-      box-sizing: border-box; /* Ensure padding doesn't overflow width */
-      flex-shrink: 0; /* Prevent header from shrinking */
+      flex-shrink: 0; /* LOCKED: Prevent header from shrinking */
     }
 
     .header-content {
@@ -91,34 +95,36 @@
         gap: 15px;
       }
     }
-    /* ------------------------- */
 
+    /* --- APP CONTAINER --- */
     .app {
       width: 100%;
       max-width: 900px;
-      height: 100vh;
       background: var(--white);
       display: flex;
       flex-direction: column;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       
-      /* Center the app in remaining space on desktop */
+      /* Flex grow to fill remaining vertical space */
+      flex: 1; 
       margin: 0 auto; 
+      overflow: hidden; /* Ensure inner scroll works */
     }
 
-    /* Desktop constraint: Make it look like a chat window */
+    /* Desktop: Add margins and borders */
     @media (min-width: 768px) {
       .app {
-        height: 85vh; /* Slightly reduced to fit header */
-        margin-top: 2vh; /* Add some spacing from header */
+        /* Fixed height on desktop relative to viewport */
+        height: 85vh; 
+        flex: none; /* Disable auto-grow on desktop to respect height */
+        margin-top: 2vh; 
         margin-bottom: 2vh;
         border-radius: 16px;
-        overflow: hidden;
         border: 1px solid var(--border-color);
       }
     }
 
-    /* --- Header (App Internal) --- */
+    /* --- APP INTERNAL HEADER --- */
     .header {
       background: var(--white);
       color: var(--up-dark);
@@ -127,6 +133,7 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex-shrink: 0; /* LOCKED: Don't shrink */
     }
 
     .header h2 {
@@ -142,11 +149,12 @@
       font-weight: 500;
     }
 
-    /* --- Chat Area --- */
+    /* --- CHAT AREA (The Scrolling Part) --- */
     .chat {
-      flex: 1;
+      flex: 1; /* Take up all available space */
+      min-height: 0; /* CRITICAL: Allows flex child to scroll */
       padding: 24px;
-      overflow-y: auto;
+      overflow-y: auto; /* Enable scroll here */
       background: #ffffff;
       display: flex;
       flex-direction: column;
@@ -169,7 +177,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* AI Bubble (Left) */
     .ai {
       background: #f2f7f2; 
       color: var(--up-dark);
@@ -177,7 +184,6 @@
       border-bottom-left-radius: 2px;
     }
 
-    /* User Bubble (Right) */
     .user {
       background: var(--up-green);
       color: var(--white);
@@ -186,7 +192,7 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
 
-    /* --- Input Area --- */
+    /* --- INPUT AREA (LOCKED BOTTOM) --- */
     .input-area {
       display: flex;
       gap: 12px;
@@ -194,6 +200,7 @@
       background: var(--white);
       border-top: 1px solid var(--border-color);
       align-items: flex-end;
+      flex-shrink: 0; /* LOCKED: Don't shrink or hide */
     }
 
     textarea {
@@ -241,7 +248,7 @@
       cursor: not-allowed;
     }
 
-    /* --- Status Bar --- */
+    /* --- STATUS BAR --- */
     .status {
       font-size: 12px;
       padding: 8px 24px;
@@ -249,6 +256,7 @@
       color: #fff;
       text-align: center;
       letter-spacing: 0.5px;
+      flex-shrink: 0; /* LOCKED */
     }
 
     .chat::-webkit-scrollbar {
@@ -269,24 +277,14 @@
   <div class="header-content">
     <span class="contact-label">Contact Developer:</span>
     <nav class="contact-links">
-      <a href="https://www.linkedin.com/in/omnis-tech/" target="_blank">
-        LinkedIn
-      </a>
-      
-      <a href="https://wa.me/2348120505881?text=Hello%2C%20I%20am%20interested%20in%20your%20services" target="_blank">
-        WhatsApp
-      </a>
-
-      <a href="mailto:taiwommanuel435@gmail.com">
-        Email
-      </a>
-
-      <a href="https://www.facebook.com/001flashAi" target="_blank">
-        Facebook
-      </a>
+      <a href="https://www.linkedin.com/in/omnis-tech/" target="_blank">LinkedIn</a>
+      <a href="https://wa.me/2348120505881?text=Hello%2C%20I%20am%20interested%20in%20your%20services" target="_blank">WhatsApp</a>
+      <a href="mailto:taiwommanuel435@gmail.com">Email</a>
+      <a href="https://www.facebook.com/001flashAi" target="_blank">Facebook</a>
     </nav>
   </div>
 </header>
+
 <div class="app">
   <div class="header">
     <h2 id="jobTitle">AI Interview</h2>
@@ -406,12 +404,9 @@
     statusEl.textContent = "Missing job_id";
     sendBtn.disabled = true;
   } else {
-    // initial message from AI
     const startMessage = `Welcome to the interview.\n\nThis interview will assess your suitability for the role.\n\nWhen you are ready, respond with "Ready" to begin.`;
     chatHistory.push({ role: "assistant", content: startMessage });
     renderMessage(startMessage, "ai");
-
-    
   }
 </script>
 
