@@ -20,9 +20,9 @@ const PORT = 3000;
    CONFIG
 ================================ */
 
-const N8N_JOBS_ENDPOINT = "https://loveofn8n.app.n8n.cloud/webhook/get-jobs";
-const N8N_APPLY_ENDPOINT = "https://YOUR-N8N-URL/webhook/apply-job";
-const N8N_INTERVIEW_ENDPOINT = "https://loveofn8n.app.n8n.cloud/webhook/interview";
+const N8N_JOBS_ENDPOINT = "https://southlord.app.n8n.cloud/webhook/get-jobs";
+const N8N_APPLY_ENDPOINT = "https://southlord.app.n8n.cloud/webhook/apply-job";
+const N8N_INTERVIEW_ENDPOINT = "https://southlord.app.n8n.cloud/webhook/interview";
 
 /* ==============================
    MIDDLEWARE
